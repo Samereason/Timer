@@ -9,7 +9,7 @@ import {Observable} from 'rxjs';
 export class AppComponent {
   title = 'Timer';
 
-  private timeValue = "00:00:00";
+  public timeValue = "00:00:00";
   private countDown = null;
   private count = 1;
   private intervalId = null;
