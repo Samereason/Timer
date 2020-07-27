@@ -1,19 +1,21 @@
-import {Component} from '@angular/core';
-import {Observable} from 'rxjs';
+import {Component, ViewChild, AfterViewInit} from '@angular/core';
+import {fromEvent, Observable } from 'rxjs';
+import {filter, buffer, debounceTime} from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent {
+export class AppComponent implements AfterViewInit{
+  @ViewChild('waitBtn') waitBtn;
+
   title = 'Timer';
 
   public timeValue = "00:00:00";
   private countDown = null;
   private count = 1;
   private intervalId = null;
-  private doubleClick = false;
 
   constructor() {}
 
@@ -55,21 +57,23 @@ export class AppComponent {
     }
   }
 
-  wait() {
-    if (!this.doubleClick) {
-      this.doubleClick = true;
-
-      setTimeout(() => this.doubleClick = false, 300);
-    } else {
-      if (this.countDown) {
-        this.clearCount();
-      }
-      this.doubleClick = false;
-    }
-  }
-
   reset() {
     this.stopCount();
     this.startCount();
+  }
+
+  ngAfterViewInit() {
+    let waitBtnClick = fromEvent(this.waitBtn.nativeElement, 'click');
+
+    const click = waitBtnClick.pipe(
+      buffer(waitBtnClick.pipe(debounceTime(300))),
+      filter(clickArray => clickArray.length === 2)
+    );
+
+    click.subscribe(() => {
+      if (this.countDown) {
+        this.clearCount();
+      }
+    })
   }
 }
